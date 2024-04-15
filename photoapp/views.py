@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from rest_framework.response import Response
 from rest_framework import status
+from roboflow import Roboflow
 
 
 # Create your views here.
@@ -47,7 +48,7 @@ def process_image(request):
 
 
         edged = cv2.Canny(blur,50,100)
-        cv2.imshow('canny',edged)
+        #cv2.imshow('canny',edged)
         edged = cv2.dilate(edged,None,iterations=2)
         edged = cv2.erode(edged,None,iterations=1)
 
@@ -88,7 +89,7 @@ def process_image(request):
             cv2.drawContours(image, [max_contour], -1, (0, 255, 0), 2)
 
             # cv2.drawContours(image,contour,-1,(0,255,0),2)
-            cv2.imshow('Largest Bounding Rectangle', image)
+            #cv2.imshow('Largest Bounding Rectangle', image)
             print(f"x = {x}, y = {y}, w = {w}, h = {h}")
 
 
@@ -98,12 +99,12 @@ def process_image(request):
             ellipse_angle = 0
             color = (0, 0, 255)
             cv2.ellipse(image, ellipse_center, axe, ellipse_angle, 0, 360, color, 2)
-            cv2.imshow('Largest Bounding Rectangle with Ellipse', image)
+            #cv2.imshow('Largest Bounding Rectangle with Ellipse', image)
 
         for i, cnt in enumerate(contour):
             cv2.drawContours(cont_image, [cnt], -1, (0, 255, 0), 2)
 
-        cv2.imshow("cont image",cont_image)
+        #cv2.imshow("cont image",cont_image)
 
         a = w/2
         b = h/2
@@ -133,6 +134,47 @@ def process_image(request):
 
     volume = h*w*first_width
     print("volume  = ", volume)
+    
+    
+@api_view(['POST'])
+def yolo_image_process(request):
+    rf = Roboflow(api_key="aQloKigxucbbRkA4uql9")
+    
+    project1 = rf.workspace("constructiondataset").project("debris-detection-ik3o3")
+    project2 = rf.workspace("constructiondataset").project("cd-material-detection")
+    
+    version1 = project1.version(1)
+    version2 = project2.version(5)
+    
+    model1 = project1.version(1).model
+    model2 = project2.version(5).model
+    
+    uploaded_file = request.FILES['image']
+        
+    file_name = default_storage.save(uploaded_file.name, ContentFile(uploaded_file.read()))
+    file_path = default_storage.path(file_name)
+
+    #image = cv2.imread(file_path)
+    
+    response1 = model1.predict(file_path, confidence = 40).json()
+    response2 = model2.predict(file_path, confidence = 15).json()
+    
+    response_final = {}
+    temp = set()
+    
+    for pred in response1['predictions']:
+        response_final['width'] = pred['width']
+        response_final['height'] = pred['height']
+        
+    for pred in response2['predictions']:
+        temp.add(pred['class'])
+        
+    response_final['material'] = temp
+    
+    return Response(response_final)
+        
+    
+
 
 
     
