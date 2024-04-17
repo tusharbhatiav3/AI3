@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-sg8tf1ci_$&u^x!ekw7mil&d#%5+&(e^z68&-87i)*n4a*%m@5
 # DEBUG = True
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['.vercel.app']
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 
