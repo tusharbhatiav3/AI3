@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-sg8tf1ci_$&u^x!ekw7mil&d#%5+&(e^z68&-87i)*n4a*%m@5
 # DEBUG = True
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh']
 DEVELOPMENT_MODE = os.getenv("DEVELOPMENT_MODE", "False") == "True"
 
 
@@ -87,12 +87,12 @@ WSGI_APPLICATION = 'AI.wsgi.application'
 #         "default": dj_database_url.parse(os.environ.get("DATABASE_URL")),
 #     }
 # else:
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -131,11 +131,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+import os
+STATICFILES_DIRS = os.path.join(BASEDIR, 'static')
 
-STATIC_ROOT = BASE_DIR / 'static/files'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
