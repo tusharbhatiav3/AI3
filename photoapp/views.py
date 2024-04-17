@@ -161,14 +161,21 @@ def yolo_image_process(request):
     
     response_final = {}
     temp = set()
-    
-    for pred in response1['predictions']:
-        response_final['width'] = pred['width']
-        response_final['height'] = pred['height']
-        
+
+    max_confidence_idx = 0
+    max_confidence = response1['predictions'][0]['confidence']
+    for i, pred in enumerate(response1['predictions']):
+        if pred['confidence'] > max_confidence:
+            max_confidence_idx = i
+            max_confidence = pred['confidence']
+
+    max_confidence_pred = response1['predictions'][max_confidence_idx]
+    response_final['width'] = max_confidence_pred['width']
+    response_final['height'] = max_confidence_pred['height']
+
     for pred in response2['predictions']:
         temp.add(pred['class'])
-        
+
     response_final['material'] = temp
     
     return Response(response_final)
